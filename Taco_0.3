@@ -1,0 +1,135 @@
+// set I/O pins
+int SW1input = A0;
+int SW2input = A1;
+int SW1output = 6;
+int SW2output = 7;
+int frontcam = 13;
+int backcam = 12;
+// variable for steering pad button selection
+int SW1value = 0;
+int SW2value = 0;
+// steering pad button ranges
+int uplow = 83;
+int uphigh = 108;
+int downlow = 266;
+int downhigh = 320;
+int leftlow = 689; //Volume down
+int lefthigh = 825; //Volume down
+int rightlow = 467; //Volume up
+int righthigh = 555; //Volume up
+int hanguplow = 467; //Offhook
+int hanguphigh = 555; //Offhook
+int pickuplow = 266; //Onhook
+int pickuphigh = 320; //Onhook
+int modelow = 83;
+int modehigh = 108;
+int voicelow = 689;
+int voicehigh = 825;
+// navigation bypass
+int navbypass = false;
+int navbypasspin = 8;
+
+void setup() {
+  Serial.begin(115200); // This will be used to output detected values while testing in the truck
+  if (! mma.begin()) {
+    Serial.println("Couldnt start");
+    while (1);
+  }
+pinMode(SW2input, INPUT);
+pinMode(SW1input, INPUT);
+pinMode(SW1output, OUTPUT);
+pinMode(SW2output, OUTPUT);
+pinMode(frontcam, OUTPUT);
+pinMode(backcam, OUTPUT);
+}
+
+void loop() {
+// read analog inputs
+SW1value = analogRead(SW1input);
+SW2value = analogRead(SW2input);
+
+////////////////////
+/// Button Logic ///
+////////////////////
+
+// up
+while (SW1value > uplow && SW1value < uphigh){
+analogWrite(SW1output, SW1value/4);
+SW1value = analogRead(SW1input);
+}
+// down
+while (SW1value > downlow && SW1value < downhigh){
+analogWrite(SW1output, SW1value/4);
+SW1value = analogRead(SW1input);
+}
+// left
+while (SW1value > leftlow && SW1value < lefthigh){
+analogWrite(SW1output, SW1value/4);
+SW1value = analogRead(SW1input);
+}
+// right
+while (SW1value > rightlow && SW1value < righthigh){
+analogWrite(SW1output, SW1value/4);
+SW1value = analogRead(SW1input);
+}
+// hangup
+while (SW2value > hanguplow && SW2value < hanguphigh){
+analogWrite(SW2output, SW2value/4);
+SW2value = analogRead(SW2input);
+}
+// pickup
+while (SW2value > pickuplow && SW2value < pickuphigh){
+analogWrite(SW2output, SW2value/4);
+SW2value = analogRead(SW2input);
+}
+// voice
+while (SW2value > voicelow && SW2value < voicehigh){
+analogWrite(SW2output, SW2value/4);
+SW2value = analogRead(SW2input);
+}
+
+////////////
+/// menu ///
+////////////
+
+if (SW2value > modelow && SW2value < modehigh){ // if mode pressed
+  delay(1000);
+  SW1value = analogRead(SW1input);
+  if (SW1value > uplow && SW1value < uphigh){ // if up pressed, front cam
+    digitalWrite (frontcam, HIGH);
+    while (!(SW1value > uplow && SW1value < uphigh)){ // keep front cam on until up pressed again
+    SW1value = analogRead(SW1input);
+          }
+    digitalWrite (frontcam, LOW);  // front cam off
+    int SW2value = (modelow + modehigh)/2;  // set input value so menu doesn't continue
+  }
+  if (SW1value > downlow && SW1value < downhigh){ // if down pressed, back cam
+    digitalWrite (backcam, HIGH);
+    while (!(SW1value > uplow && SW1value < uphigh)){ // keep back cam on until down pressed again
+    SW1value = analogRead(SW1input);
+          }
+    digitalWrite (backcam, LOW);  // back cam off
+    int SW2value = (modelow + modehigh)/2;  // set input value so menu doesn't continue
+  }
+  while (!(SW2value > modelow && SW2value < modehigh)){
+    // voice button for nav bypass
+    if (SW2value > voicelow && SW2value < voicehigh){
+      if (navbypass == false){
+        int navbypass = true;
+        digitalWrite(navbypasspin, LOW);
+        delay(1000);
+        }
+      else {
+          int navbypass = false;
+          digitalWrite(navbypasspin, HIGH);
+          delay (1000);
+        }
+      }
+      // voice button for nav bypass
+    SW2value = analogRead(SW2input);
+
+      }
+      }
+Serial.println(SW1input);      // This will be used to output detected values while testing in the truck
+Serial.println(SW2input);      // This will be used to output detected values while testing in the truck
+}
