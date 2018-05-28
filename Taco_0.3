@@ -31,10 +31,6 @@ int navbypasspin = 8;
 
 void setup() {
   Serial.begin(115200); // This will be used to output detected values while testing in the truck
-  if (! mma.begin()) {
-    Serial.println("Couldnt start");
-    while (1);
-  }
 pinMode(SW2input, INPUT);
 pinMode(SW1input, INPUT);
 pinMode(SW1output, OUTPUT);
@@ -130,6 +126,8 @@ if (SW2value > modelow && SW2value < modehigh){ // if mode pressed
 
       }
       }
+Serial.print("SW1 input: ");
 Serial.println(SW1input);      // This will be used to output detected values while testing in the truck
+Serial.print("SW2 input: ");
 Serial.println(SW2input);      // This will be used to output detected values while testing in the truck
 }
